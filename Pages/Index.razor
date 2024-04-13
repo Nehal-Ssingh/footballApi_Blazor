@@ -1,0 +1,42 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<button @onclick="GetMatches">Get Matches</button>
+
+<pre>@formattedMatches</pre>
+
+@code {
+    string formattedMatches = "No Data";
+
+    HttpClient client = new HttpClient();
+
+    public async Task GetMatches()
+    {
+        var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://api-football-v1.p.rapidapi.com/v3/fixtures?date=2021-01-29"),
+                Headers =
+            {
+                { "X-RapidAPI-Key", "608e3cb2aemsh15488665c413753p17d256jsne32315ef42ad" },
+                { "X-RapidAPI-Host", "api-football-v1.p.rapidapi.com" },
+            },
+            };
+
+        try
+        {
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+                formattedMatches = body;
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP request errors
+            formattedMatches = $"Error: {ex.Message}";
+        }
+    }
+}
